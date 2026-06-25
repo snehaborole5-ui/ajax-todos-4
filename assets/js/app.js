@@ -1,270 +1,254 @@
 const cl = console.log;
-const todoform = document.getElementById('todoform')
-const title = document.getElementById('title')
-const userId = document.getElementById('userId')
-const completed = document.getElementById('completed')
-const Addtodo = document.getElementById('Addtodo')
-const Updatetodo = document.getElementById('Updatetodo')
-const todocontainer = document.getElementById('todocontainer')
-const spinner = document.getElementById('spinner')
 
+const spinner = document.getElementById('spinner');
+const postContainer = document.getElementById('postContainer');
+const postForm = document.getElementById('postForm');
+const titleControl = document.getElementById('title');
+const bodyControl = document.getElementById('body');
+const userIdControl = document.getElementById('userId');
+const addPostBtn = document.getElementById('addPostBtn');
+const updatePostBtn = document.getElementById('updatePostBtn');
 
+const BASE_URL = `https://jsonplaceholder.typicode.com`;
+const POST_URL = `${BASE_URL}/posts`;
 
-let todoArr =[]
+let postsArr = [];
+let updateId = null;
 
-let Base_url ='https://jsonplaceholder.typicode.com/todos'
-
-
-
-function snackbar(msg,icon){
-    swal.fire({
-        title : msg,
-        icon : icon,
-        timer : 3000
-    })
+function snackbar(msg, icon) {
+    Swal.fire({
+        title: msg,
+        icon: icon,
+        timer: 3000
+    });
 }
 
-function showicon(status){
-    if(status.toString() == 'true'){ 
-        return `<i class="fa-regular fa-square-check fa-2x text-success"></i>`
-    }else{
-        return `<i class="fa-regular fa-circle-xmark fa-2x text-danger"></i>`
-    }
+function initTooltips() {
+    $('[data-toggle="tooltip"]').tooltip({
+        boundary: 'window'
+    });
 }
 
-
-
-function fetchtodos (){
-    
-    spinner.classList.remove('d-none')
-    let xhr = new XMLHttpRequest()
-
-
-    xhr.open('GET',Base_url)
-
-    xhr.send(null)
-
-    xhr.onload = function(){
-        todoArr = JSON.parse(xhr.response)
-        
-        createposts(todoArr.reverse())
-        
-    }
-
-}
-
-fetchtodos()
-
-
-
-
-function createposts(arr){
-    let result = ''
-    arr.forEach((ele,i) =>{
-        result +=`<tr id=${ele.id}>
-					    <td>${arr.length- i}</td>
-						<td>${ele.userId}</td>
-						<td>${ele.title}</td>
-						<td>${showicon(ele.completed)}</td>
-						<td><i class="fa-regular fa-pen-to-square fa-2x text-success" onclick='Onedit(${ele.id})'></i></td>
-						<td><i class="fa-solid fa-trash fa-2x text-danger" onclick='Onremove(${ele.id})'></i></td>
-		    	    </tr>`
-    })
-
-
-    todocontainer.innerHTML =result
-
-
-    spinner.classList.add('d-none')
-}
-
-
-function onsubmit(ele){
-    spinner.classList.remove('d-none')
-
-    ele.preventDefault()
-
-    let newtodo ={
-        title : title.value,
-        userId : userId.value,
-        completed : completed.value
-    }
-
-    todoArr.unshift(newtodo)
-
-    let xhr = new XMLHttpRequest()
-    xhr.open('POST',Base_url)
-
-    xhr.send(JSON.stringify(newtodo))
-
-    xhr.onload = function(){
-        if(xhr.status >= 200 && xhr.status <= 299){
-            let res = JSON.parse(xhr.response)
-
-
-            createnewtodo(newtodo,res)
-        }
-    }
-
-}
-
-
-function createnewtodo(newtodo,res){
-    let tr = document.createElement('tr')
-    tr.id = res.id
-    
-    tr.innerHTML =`<td>${todoArr.length}</td>
-						<td>${newtodo.userId}</td>
-						<td>${newtodo.title}</td>
-						<td>${showicon(newtodo.completed)}</td>
-						<td><i class="fa-regular fa-pen-to-square fa-2x text-success" onclick='Onedit(${res.id})'></i></td>
-						<td><i class="fa-solid fa-trash fa-2x text-danger" onclick='Onremove(${res.id})'></i></td>
-		    	    `
-
-    todocontainer.prepend(tr)
-    spinner.classList.add('d-none')
-
-
-    snackbar(`The new todo with id ${res.id} is Added Successfully!!!`,'success')
-
-    todoform.reset()
-}
-
-
-function Onedit(id){
-    spinner.classList.add('d-none')
-
-    let editid = id;
-    localStorage.setItem('editId',editid)
-    let editUrl = `${Base_url}/${editid}`
-
-    let xhr = new XMLHttpRequest()
-    
-    xhr.open('GET',editUrl)
-
-    xhr.send(null)
+function fetchPosts() {
+    spinner.style.display = 'flex';
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', POST_URL);
+    xhr.send(null);
 
     xhr.onload = function () {
-        if(xhr.status >= 200 && xhr.status <= 299){
-            let editObj = JSON.parse(xhr.response)
-
-            title.value = editObj.title
-            userId.value = editObj.userId
-            completed.value = editObj.completed
-
-
-
-            Addtodo.classList.add('d-none')
-            Updatetodo.classList.remove('d-none')
-
-
-
+        spinner.style.display = 'none';
+        if (xhr.status >= 200 && xhr.status <= 299) {
+            let data = JSON.parse(xhr.response);
+            postsArr = [...data];
+            createPostCards(postsArr.reverse());
+        } else {
+            snackbar('Error while fetching data', 'error');
         }
-
-        spinner.classList.add('d-none')
-
-    }
-
-
+    };
+    xhr.onerror = function() {
+        spinner.style.display = 'none';
+        snackbar('Network Error!', 'error');
+    };
 }
 
-function onupdate(){
-    spinner.classList.remove('d-none')
+function createPostCards(arr) {
+    let result = '';
+    arr.forEach(post => {
+        result += `
+            <div class="col-md-4 mb-3" id='${post.id}'>
+                <div class="card h-100 shadow-sm bg-white border-0">
+                    <div class="card-header bg-white">
+                        <h3 class="h6 truncate-text mb-0" data-toggle="tooltip" title="${post.title}">
+                           ${post.title}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted truncate-text" data-toggle="tooltip" title="${post.body}">
+                            ${post.body}
+                        </p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between bg-white border-top-0">
+                        <button onclick="onEdit(this)" class="btn btn-sm btn-outline-success">Edit</button>
+                        <button onclick="onRemove(this)" class="btn btn-sm btn-outline-warning">Remove</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    postContainer.innerHTML = result;
+    initTooltips();
+}
 
-    let updateId = localStorage.getItem('editId')
+function onPostSubmit(eve) {
+    eve.preventDefault();
 
-    let updateObj ={
-        title : title.value,
-        userId : userId.value,
-        completed : completed.value,
-        id : updateId
-    }
+    let POST_OBJ = {
+        title: titleControl.value,
+        body: bodyControl.value,
+        userId: userIdControl.value
+    };
 
-
-    let updateUrl = `${Base_url}/${updateId}`
-
-    let xhr = new XMLHttpRequest()
-
-    xhr.open('PUT',updateUrl)
-
-    xhr.send(JSON.stringify(updateObj))
+    spinner.style.display = 'flex';
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', POST_URL);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.send(JSON.stringify(POST_OBJ));
 
     xhr.onload = function () {
-        if(xhr.status >= 200 && xhr.status <= 299){
-            let tr = document.getElementById(updateId).children
-
-            tr[1].innerText = updateObj.userId
-            tr[2].innerText = updateObj.title
-            tr[3].innerHTML = showicon(updateObj.completed)
+        spinner.style.display = 'none';
+        if (xhr.status >= 200 && xhr.status <= 299) {
+            let res = JSON.parse(xhr.response);
             
-            Addtodo.classList.remove('d-none')
-            Updatetodo.classList.add('d-none')
-            snackbar(`The  todo with id ${updateId} is Updated Successfully!!!`,'success')
+            res.title = res.title || POST_OBJ.title;
+            res.body = res.body || POST_OBJ.body;
+            res.userId = res.userId || POST_OBJ.userId;
 
+        
+            $('#postModal').modal('hide');
+            postForm.reset();
 
+            let col = document.createElement('div');
+            col.className = 'col-md-3 mb-3';
+            col.id = res.id;
+            col.innerHTML = `
+                <div class="card h-100 shadow-sm bg-white border-0">
+                    <div class="card-header bg-white">
+                        <h3 class="h6 truncate-text mb-0" data-toggle="tooltip" title="${res.title}">
+                            ${res.title}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text small text-muted truncate-text" data-toggle="tooltip" title="${res.body}">
+                            ${res.body}
+                        </p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between bg-white border-top-0">
+                        <button onclick="onEdit(this)" class="btn btn-sm btn-outline-success">Edit</button>
+                        <button onclick="onRemove(this)" class="btn btn-sm btn-outline-warning">Remove</button>
+                    </div>
+                </div>
+            `;
+            postContainer.prepend(col);
+            initTooltips();
+            snackbar(`New post with id ${res.id} created !!!`, 'success');
         }
-
-     spinner.classList.add('d-none')
-
-    }
-
-
-
+    };
 }
 
+function onEdit(ele) {
+    updateId = ele.closest('.col-md-4').id;
+    let EDIT_URL = `${BASE_URL}/posts/${updateId}`;
 
-function Onremove(id){
-    let removeId =id;
+    spinner.style.display = 'flex';
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', EDIT_URL);
+    xhr.send(null);
 
-    let removeURl = `${Base_url}/${removeId}`
+    xhr.onload = function () {
+        spinner.style.display = 'none';
+        if (xhr.status >= 200 && xhr.status <= 299) {
+            let res = JSON.parse(xhr.response);
+            titleControl.value = res.title;
+            bodyControl.value = res.body;
+            userIdControl.value = res.userId;
 
+            addPostBtn.classList.add('d-none');
+            updatePostBtn.classList.remove('d-none');
+            
+            $('#postModal').modal('show');
+        }
+    };
+}
+
+function onUpdatePost() {
+    let UPDATE_OBJ = {
+        title: titleControl.value,
+        body: bodyControl.value,
+        userId: userIdControl.value
+    };
+
+    spinner.style.display = 'flex';
+    let UPDATE_URL = `${BASE_URL}/posts/${updateId}`;
+
+    let xhr = new XMLHttpRequest();
+    xhr.open('PATCH', UPDATE_URL);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.send(JSON.stringify(UPDATE_OBJ));
+
+    xhr.onload = function () {
+        spinner.style.display = 'none';
+        if (xhr.status >= 200 && xhr.status <= 299) {
+            
+            $('#postModal').modal('hide');
+
+            let card = document.getElementById(updateId);
+            let heading = card.querySelector('h3');
+            let paragraph = card.querySelector('p');
+
+            $(heading).tooltip('dispose');
+            $(paragraph).tooltip('dispose');
+
+            heading.innerHTML = UPDATE_OBJ.title;
+            paragraph.innerHTML = UPDATE_OBJ.body;
+
+            heading.setAttribute('title', UPDATE_OBJ.title);
+            paragraph.setAttribute('title', UPDATE_OBJ.body);
+
+            initTooltips();
+            postForm.reset();
+
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('highlight');
+            setTimeout(() => { card.classList.remove('highlight'); }, 3000);
+
+            updateId = null;
+            addPostBtn.classList.remove('d-none');
+            updatePostBtn.classList.add('d-none');
+            snackbar('Post updated successfully !!!', 'success');
+        }
+    };
+}
+
+function onRemove(ele) {
+    let REMOVE_ID = ele.closest('.col-md-4').id;
 
     Swal.fire({
-    title: "Are you sure?",
-    text: "You won't be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
-    if (result.isConfirmed){
-        
-        let xhr = new XMLHttpRequest()
+        title: 'Are you sure?',
+        text: 'Do you want to remove this post?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Remove'
+    }).then(result => {
+        if (result.isConfirmed) {
+            spinner.style.display = 'flex';
+            let REMOVE_URL = `${BASE_URL}/posts/${REMOVE_ID}`;
 
-        xhr.open('DELETE',removeURl)
+            let xhr = new XMLHttpRequest();
+            xhr.open('DELETE', REMOVE_URL);
+            xhr.send(null);
 
-        xhr.send(null)
-
-        xhr.onload = function () {
-            if(xhr.status >= 200 && xhr.status <= 299){
-                let tr = document.getElementById(removeId)
-
-                tr.remove()
-
-                snackbar(`The todo Item with id ${removeId} is Removed Successfully!!!`,'success')
-            }
+            xhr.onload = function () {
+                spinner.style.display = 'none';
+                if (xhr.status >= 200 && xhr.status <= 299) {
+                    let card = document.getElementById(REMOVE_ID);
+                    $(card.querySelector('h3')).tooltip('dispose');
+                    $(card.querySelector('p')).tooltip('dispose');
+                    card.remove();
+                    snackbar('Post removed successfully !!!', 'success');
+                }
+            };
         }
-    }
     });
-
-
-
-
-
-
-
-
-
-
-
 }
 
 
+$('#postModal').on('hidden.bs.modal', function () {
+    postForm.reset();
+    updateId = null;
+    addPostBtn.classList.remove('d-none');
+    updatePostBtn.classList.add('d-none');
+});
 
-
-
-
-
-todoform.addEventListener('submit',onsubmit)
-Updatetodo.addEventListener('click',onupdate)
+fetchPosts();
+postForm.addEventListener('submit', onPostSubmit);
+updatePostBtn.addEventListener('click', onUpdatePost);

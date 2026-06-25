@@ -1,15 +1,73 @@
+
 body{
-    background-color: rgb(255, 127, 251);
+    background-color: fuchsia;
+}
+.card{
+    /* border-color: midnightblue !important; */
+    color: darkgreen;
+}
+.card-header{
+    background-color: darkkhaki !important;
 }
 
-.spinner{
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: rgba(255, 255, 0, 0.75);
+.card-body{
+    background-color: darkred !important;
+    color: black;
+}
+
+.col-md-3 .card {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+.col-md-3 .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
+}
+
+
+.modal-body label {
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+.modal-body .form-control {
+    border: 0;
+    border-bottom: 1px solid #ced4da;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    background-color: transparent !important;
+}
+.modal-body .form-control:focus {
+    box-shadow: none;
+    border-color: #007bff;
+}
+
+
+.spinner-overlay {
     height: 100vh;
     width: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 1060;
+}
+
+.truncate-text {
+    display: -webkit-box;
+    /* -webkit-line-clamp: 2; */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* .card-header .truncate-text {
+    /* -webkit-line-clamp: 1; */
+/* } */ 
+
+
+.highlight {
+    box-shadow: 0 0 15px rgba(80, 250, 154, 0.5) !important;
+    border: 1px solid olivedrab;
+    transition: all 0.5s ease;
 }
