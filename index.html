@@ -1,63 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posts Dashboard 4</title>
+    <title>Todo Application - Premium</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
 
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-5">
-            <h2 class="font-weight-bold text-secondary">Posts Dashboard</h2>
-            <button type="button" class="btn btn-primary font-weight-bold px-4 py-2 shadow-sm" data-toggle="modal" data-target="#postModal" id="openModalBtn">
-                Add New Post
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <h2 class="main-heading">Task Manager</h2>
+            <button id="openModalBtn" class="btn btn-add-custom">
+                <svg class="mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add New Todo
             </button>
         </div>
 
-        <div class="row" id="postContainer"></div>
+        <div class="card table-card shadow">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Edit</th>
+                            <th class="text-center">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="todoContainer">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg p-4">
-                <div class="modal-body">
-                    <form id="postForm">
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark d-block mb-1">Title*</label>
-                            <input type="text" id="title" class="form-control" placeholder="Enter title" required>
-                        </div>
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark d-block mb-1">Body*</label>
-                            <textarea id="body" class="form-control" rows="4" placeholder="Enter body" required></textarea>
-                        </div>
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark d-block mb-1">User ID*</label>
-                            <select id="userId" class="form-control" required>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                            </select>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-5">
-                            <button type="submit" id="addPostBtn" class="btn btn-success px-4 font-weight-bold py-2">Add Post</button>
-                            <button type="button" id="updatePostBtn" class="btn btn-warning px-4 font-weight-bold py-2 d-none">Update Post</button>
-                            <button type="button" class="btn btn-link text-secondary font-weight-bold text-decoration-none" data-dismiss="modal">Close</button>
-                        </div>
-                    </form>
+    <div id="modalBackdrop" class="modal-backdrop-custom" style="display: none;"></div>
+
+    <div id="todoModal" class="todo-modal-custom" style="display: none;">
+        <div class="modal-custom-header">
+            <h4 id="modalTitle" class="m-0 font-weight-bold text-white">Add New Todo</h4>
+            <button id="closeModalIcon" class="close-modal-icon">&times;</button>
+        </div>
+        <div class="modal-custom-body">
+            <form id="todoForm">
+                <div class="form-group">
+                    <label for="title" class="custom-label">Todo Title *</label>
+                    <input type="text" id="title" class="form-control custom-input" placeholder="Enter title..." required>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label for="userId" class="custom-label">User ID *</label>
+                    <input type="number" id="userId" class="form-control custom-input" placeholder="Enter user ID..." required>
+                </div>
+                <div class="form-group">
+                    <label for="completed" class="custom-label">Status *</label>
+                    <select id="completed" class="form-control custom-input">
+                        <option value="false">Pending</option>
+                        <option value="true">Completed</option>
+                    </select>
+                </div>
+                <div class="modal-custom-footer text-right mt-4">
+                    <button type="button" id="closeModalBtn" class="btn btn-close-custom mr-2">Close</button>
+                    <button type="submit" id="addTodoBtn" class="btn btn-save-custom">Add Todo</button>
+                    <button type="button" id="updateTodoBtn" class="btn btn-update-custom d-none">Update Todo</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -70,6 +80,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://custom-script.js"></script>
     <script src="./assets/js/app.js"></script>
 </body>
 </html>
